@@ -1,0 +1,61 @@
+{
+  "requestData": {
+    "requiredFields": [
+      "house",
+      "owner_name",
+      "tenant_name",
+      "resident",
+      "penalty_amount",
+      "invoiced_amount",
+      "total_amount"
+    ],
+    "pagination": {
+      "count": 25,
+      "page": 3
+    },
+    "sorting": [],
+    "conditions": [
+      {
+        "name": "building",
+        "operation": "in",
+        "values": [
+          58501,
+          163813
+        ]
+      },
+      {
+        "name": "fin_year_id",
+        "operation": "equal",
+        "values": [
+          "565751"
+        ]
+      },
+      {
+        "name": "report_type",
+        "operation": "equal",
+        "values": [
+          "total_dues"
+        ]
+      },
+      {
+        "name": "resident_type",
+        "operation": "in",
+        "values": []
+      },
+      {
+        "name": "till_date",
+        "operation": "lte",
+        "values": [
+          1725290957
+        ]
+      },
+      {
+        "name": "view",
+        "operation": "equal",
+        "values": [
+          "account-wise"
+        ]
+      }
+    ]
+  }
+}

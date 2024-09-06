@@ -1,0 +1,15 @@
+query getDuesReportList($requestData: DataListInput) {
+  getDuesReportList(requestData: $requestData) {
+    dataResponse {
+      data
+      filterType
+      totalCount
+      reportHeaders
+      __typename
+    }
+    message
+    statusCode
+    success
+    __typename
+  }
+}
