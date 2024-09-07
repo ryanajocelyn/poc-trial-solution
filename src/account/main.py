@@ -140,9 +140,10 @@ class Maintenance:
             "BIL/INFT/DH17399857/Flat701Aug2024/GOVINDARAJAN VA",
             "UPI/422195444374/Maintenance905/8072234138@ibl/Bank ofIndia/IBL251917a2a9554bc1b997bd5dd78a06ce",
         ]
+        credit_svc = CreditSvc(pd.DataFrame(), self.params)
         for txt in txts:
             row = {"Description": txt}
-            house = self.parse_house(row)
+            house = credit_svc.parse_house(row)
             print(f"{house} === {txt}")
 
 
