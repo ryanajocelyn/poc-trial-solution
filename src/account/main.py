@@ -1,13 +1,14 @@
 import logging
+import math
 import re
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 
 import camelot
 import pandas as pd
-import requests
 from dotenv import load_dotenv
 
 from account.common.api import Api
+from account.common.write_excel import XlsWriter
 from account.utils.constants import FLAT_NOS, MAINT_PER_APT
 
 load_dotenv()
@@ -79,6 +80,8 @@ class Maintenance:
             ]
         ]
         self.write_to_csv(merged_df, "bill_plan_receipts.csv")
+
+        self.dues()
 
     def process_credits(self, df):
         logger.info("Processing all credits.")
@@ -467,11 +470,62 @@ class Maintenance:
         return content
 
     def dues(self):
-        api_param = {"requestData": {"pagination": {"page": 2}}}
+        dues_list = []
+        headers = {}
+        curr_date = int(datetime.now().timestamp())
+        for page in range(1, 4):
+            api_param = {
+                "requestData": {
+                    "pagination": {"page": page},
+                    "conditions": [
+                        {
+                            "name": "till_date",
+                            "operation": "lte",
+                            "values": [curr_date],
+                        }
+                    ],
+                }
+            }
 
-        # Define the GraphQL query
-        data = Api().post("dues", params=api_param)
-        print(data)
+            # Define the GraphQL query
+            data = Api().post("dues", params=api_param)
+            data_resp = data["data"]["getDuesReportList"]["dataResponse"]
+            report_header = data_resp["reportHeaders"]
+            headers = {head["accessor"]: head["header"] for head in report_header}
+            dues_list.extend(data_resp["data"])
+
+        full_dues_df = pd.DataFrame(dues_list)
+        full_dues_df.rename(columns=headers, inplace=True)
+
+        dues_df = full_dues_df[full_dues_df["Total Dues"] > 0]
+        dues_df = dues_df.reset_index(drop=True)
+
+        dues_df["Maintenance Charge"] = dues_df.apply(self.combine_maint, axis=1)
+
+        dues_df = dues_df[
+            [
+                "Unit",
+                "Owner Name",
+                "Maintenance Charge",
+                "Metro Water - 2020",
+                "Late Payment Fine",
+                "Move in/out - Incidental Charges",
+                "Total Dues",
+            ]
+        ]
+
+        XlsWriter(self.params["base_path"]).write(dues_df)
+        logger.info("Dues report generated successfully.")
+
+    def combine_maint(self, row):
+        maint = row["Maintenance Charge"]
+        instore = row["Maintenance - Instore"]
+        if not math.isnan(instore):
+            maint = (
+                row["Maintenance - Instore"] + row["CGST Output"] + row["SGST Output"]
+            )
+
+        return maint
 
     def test(self):
         txts = [
@@ -500,5 +554,4 @@ if __name__ == "__main__":
     }
     maint = Maintenance(params=params)
     maint.run()
-    # maint.dues()
     # maint.test()

@@ -1,3 +1,5 @@
+import os
+
 FLAT_NOS = ["104", "105", "106", "107", "108"]
 FLAT_NOS.extend(["204", "205", "207", "208"])
 FLAT_NOS.extend(["304", "305", "306", "307", "308"])
@@ -19,3 +21,5 @@ MAINT_PER_APT = {
     7: 4000,
     8: 2660,
 }
+
+ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN")

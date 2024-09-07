@@ -4,6 +4,8 @@ from pathlib import Path
 
 import requests
 
+from account.utils.constants import ACCESS_TOKEN
+
 
 class Api:
     def __init__(self):
@@ -11,18 +13,14 @@ class Api:
 
     def post(self, fn_name: str, params: dict):
         # Define the headers (include any required authorization tokens)
-        headers = {
-            "Authorization": "w5r5YaQN8hXvi7PGuZUChPC9PlmGGXfXgWOVoWzeyBZ1n5Po1KNbINdeQEjHZLQT"
-        }
+        headers = {"Authorization": ACCESS_TOKEN}
 
         query = self.__gql_config(fn_name, "query")
-        print(query)
 
         variables = self.__gql_config(fn_name, "var")
         variables = json.loads(variables)
         try:
             self.__update_variables(variables, params)
-            print(variables)
         except Exception as e:
             print(e)
 
@@ -36,7 +34,6 @@ class Api:
         if response.status_code == 200:
             # Parse the JSON response
             data = response.json()
-            print(data)
         else:
             print(
                 f"Query failed with status code {response.status_code}: {response.text}"
@@ -48,6 +45,19 @@ class Api:
         for key, value in params.items():
             if isinstance(value, dict):
                 self.__update_variables(variables[key], value)
+            elif isinstance(value, list):
+                if key == "values":
+                    variables[key] = value
+                else:
+                    for list_val in value:
+                        var_val = None
+                        for var_tpl in variables[key]:
+                            if list_val["name"] == var_tpl["name"]:
+                                var_val = var_tpl
+                                break
+
+                        if var_val:
+                            self.__update_variables(var_val, list_val)
             else:
                 variables[key] = value
 

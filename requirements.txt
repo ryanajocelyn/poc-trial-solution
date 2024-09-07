@@ -21,3 +21,4 @@ camelot-py==0.11.0
 python-dotenv==1.0.1
 opencv-python==4.10.0.84
 ghostscript==0.7
+openpyxl==3.2.0b1
