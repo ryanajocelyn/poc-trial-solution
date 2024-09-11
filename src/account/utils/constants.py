@@ -23,3 +23,51 @@ MAINT_PER_APT = {
 }
 
 ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN")
+
+BILL_PLAN_TPL_DROP_COLS = [
+    "Paying Amount",
+    "Receipt Date",
+    "Mode",
+    "Cheque No",
+    "Bank Name",
+    "Bank Branch",
+    "Receiving Account",
+    "Reference",
+    "Description",
+]
+
+BILL_PLAN_TPL_COLS = [
+    "Batch",
+    "Date",
+    "Due Date",
+    "House",
+    "Charge Id",
+    "Item Description",
+    "Charge Account",
+    "Balance",
+    "Paying Amount",
+    "Total Invoice Amount",
+    "Receipt Date",
+    "Excess Amount",
+    "Mode",
+    "Cheque No",
+    "Bank Name",
+    "Bank Branch",
+    "Receiving Account",
+    "Reference",
+    "Description",
+]
+
+RECEIPTS_ADVANCE_COLS = [
+    "Sl No",
+    "House",
+    "Mode",
+    "Cheque number",
+    "Bank name",
+    "Bank branch",
+    "Receipt Date(dd-mm-yy)",
+    "Advance Receiving Amount",
+    "Reference",
+    "Description",
+    "Receiving Account",
+]

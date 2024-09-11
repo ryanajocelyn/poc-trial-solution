@@ -66,6 +66,28 @@ class Maintenance:
         df = df.drop(index=[0])
         df["Description"] = df["Description"].str.replace("\n", "")
 
+        recon_df = df.copy()
+        recon_df["Amount"] = recon_df["Amount"].str.replace(",", "")
+        recon_df["Paying Amount"] = recon_df["Paying Amount"].str.replace(",", "")
+
+        recon_df.rename(
+            columns={
+                "Transaction Posted Date": "Transaction Date",
+                "Amount": "Withdrawal",
+                "Paying Amount": "Deposit",
+            },
+            inplace=True,
+        )
+
+        credit_svc = CreditSvc(pd.DataFrame(), self.params)
+        credit_svc.write_to_csv(recon_df, "reconcilation.csv", header=False)
+
+        start_row = self.params.get("start_row", 0)
+        if start_row > 0:
+            df["Sl No"] = df["Sl No"].astype(int)
+            df = df[df["Sl No"] >= start_row]
+            df = df.reset_index(drop=True)
+
         self.logger.info(f"Tables Extracted: Rows = {len(df)}")
         return df
 
@@ -150,8 +172,9 @@ class Maintenance:
 if __name__ == "__main__":
     m_params = {
         "base_path": "D:\\Abiz\\Flats\\Vedanshi\\2024-25\\06. Sep",
-        "stmt_nm": "DetailedStatement-1.pdf",
+        "stmt_nm": "DetailedStatement-3.pdf",
         "tpl_nm": "batch_dues_receipt_upload_5223004_.csv",
+        "start_row": 44,
     }
     maint = Maintenance(params=m_params)
     maint.run()

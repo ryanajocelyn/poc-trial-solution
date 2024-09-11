@@ -1,6 +1,7 @@
 from datetime import datetime
 
 import pandas as pd
+from PyPDF2 import PdfFileReader, PdfFileWriter, PdfWriter, PdfReader
 from openpyxl import load_workbook
 from openpyxl.styles import Border, Side
 
@@ -11,14 +12,16 @@ class XlsWriter:
     def __init__(self, base_path):
         parent_dir = get_parent_dir(__file__)
         self.template = f"{parent_dir}\\config\\dues_template.xlsx"
-        self.path = f"{base_path}\\Dues\\dues.xlsx"
+        self.path = f"{base_path}\\Dues"
 
     def write(self, df):
         # Load your existing Excel file (template)
         book = load_workbook(self.template)
 
+        xls_path = f"{self.path}\\dues.xlsx"
+
         # Select the desired sheet where you want to write the data
-        writer = pd.ExcelWriter(self.path, engine="openpyxl")
+        writer = pd.ExcelWriter(xls_path, engine="openpyxl")
         writer._book = book
         sheet_name = "Dues"
 
@@ -56,4 +59,22 @@ class XlsWriter:
         ws[cell] = df["Total Dues"].sum()
         cur_date = datetime.now().strftime("%b %d, %Y")
         ws["A2"] = f"Dues as of {cur_date}"
-        book.save(self.path)
+        book.save(xls_path)
+
+        # ws.sheet_state = "hidden"
+        tmp_pdf = f"{self.path}\\dues_tmp.pdf"
+        book.save(tmp_pdf)
+
+        # ws.sheet_state = "visible"
+
+        # Create a PDF writer
+        pdf_writer = PdfWriter()
+
+        # Merge the temporary PDF into the final PDF
+        pdf_reader = PdfReader(open(tmp_pdf, "rb"))
+        pdf_writer.addPage(pdf_reader.getPage(0))
+
+        # Write the final PDF
+        pdf_path = f"{self.path}\\dues_pdf.pdf"
+        with open(pdf_path, "wb") as f:
+            pdf_writer.write(f)

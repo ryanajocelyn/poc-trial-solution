@@ -1,10 +1,18 @@
+import json
 import re
 
 import pandas as pd
 
 from account.service.base_svc import BaseSvc
 from account.utils.app_logger import AppLogger
-from account.utils.constants import FLAT_NOS, MAINT_PER_APT
+from account.utils.constants import (
+    FLAT_NOS,
+    MAINT_PER_APT,
+    BILL_PLAN_TPL_DROP_COLS,
+    BILL_PLAN_TPL_COLS,
+    RECEIPTS_ADVANCE_COLS,
+)
+from account.utils.utils import get_parent_dir
 
 
 class CreditSvc(BaseSvc):
@@ -19,12 +27,15 @@ class CreditSvc(BaseSvc):
         cr_df = self.get_cr_dr_rows(self.df)
         cr_df["House"] = cr_df.apply(self.parse_house, axis=1)
         cr_df["Reference"] = cr_df.apply(self.parse_reference, axis=1)
-        cr_df = self.handle_dual_house(cr_df, "903", "107A")
-        cr_df = self.handle_dual_house(cr_df, "607", "608")
+
+        for house1, house2 in [("903", "107A"), ("607", "608")]:
+            cr_df = self.handle_dual_house(cr_df, house1, house2)
+
         self.format_fields(
             cr_df, date_fields=["Receipt Date"], floats=["Paying Amount"]
         )
-        self.write_to_csv(cr_df, "dues_receipt.csv")
+
+        self.write_to_csv(cr_df, "receipts_dues.csv")
 
         self.gen_bill_plan_template(cr_df)
 
@@ -46,25 +57,8 @@ class CreditSvc(BaseSvc):
             if content:
                 break
 
-        name_mappings = {
-            "KIDIYURVIN": 207,
-            "SARASWATHI.SUBR": 208,
-            "KALPANAMAJUMDER": 703,
-            "GEETA IYER HARI": 706,
-            "GEETA HARIHARAN": 706,
-            "AANANDALAXMI M": 404,
-            "NEDUMARANTHANGAMANI": 904,
-            "VENKATARAGHAVAN": 308,
-            "R GANESH": 504,
-            "PRASANNAL": 507,
-            "VIDYA SAGAR": 407,
-            "KYOYEON": 408,
-            "N MESIAH": 505,
-            "A V M FUELS": 607,
-            "RAJAMANI": 307,
-            "RASIK": 905,
-            "INSTORE": "Instore",
-        }
+        # Read the Flat and Owner name mappings
+        name_mappings = self.get_flat_name_mappings()
 
         if not content:
             desc = row["Description"]
@@ -80,6 +74,10 @@ class CreditSvc(BaseSvc):
 
     def handle_dual_house(self, cr_df, house1, house2):
         two_house = cr_df[cr_df["House"] == f"Apt-{house1}"]
+        if two_house.empty:
+            self.logger.info("No Dual House Entry available. Skipping")
+            return cr_df
+
         amt = two_house["Paying Amount"].iloc[0]
         amt = amt.replace(",", "")
 
@@ -101,44 +99,50 @@ class CreditSvc(BaseSvc):
     def gen_bill_plan_template(self, cr_df):
         # Create the template export by bill plan
         tpl_df = pd.read_csv(self.template_path)
-        tpl_df = tpl_df.drop(
-            columns=[
-                "Paying Amount",
-                "Receipt Date",
-                "Mode",
-                "Cheque No",
-                "Bank Name",
-                "Bank Branch",
-                "Receiving Account",
-                "Reference",
-                "Description",
-            ]
+
+        # Drop columns that exist in the statement rows
+        tpl_df = tpl_df.drop(columns=BILL_PLAN_TPL_DROP_COLS)
+        tpl_df = pd.merge(tpl_df, cr_df, on="House", how="left")
+
+        self.write_bill_plan_receipts(tpl_df)
+
+        self.write_advance_receipts(tpl_df)
+
+    def write_advance_receipts(self, tpl_df):
+        advanced_df = tpl_df[tpl_df["Paying Amount"] > tpl_df["Total Invoice Amount"]]
+        advanced_df = advanced_df.reset_index(drop=True)
+        advanced_df.rename(
+            columns={
+                "Cheque No": "Cheque number",
+                "Bank Name": "Bank name",
+                "Bank Branch": "Bank branch",
+                "Receipt Date": "Receipt Date(dd-mm-yy)",
+            },
+            inplace=True,
         )
-        merged_df = pd.merge(tpl_df, cr_df, on="House", how="left")
-        merged_df = merged_df[
-            [
-                "Batch",
-                "Date",
-                "Due Date",
-                "House",
-                "Charge Id",
-                "Item Description",
-                "Charge Account",
-                "Balance",
-                "Paying Amount",
-                "Total Invoice Amount",
-                "Receipt Date",
-                "Excess Amount",
-                "Mode",
-                "Cheque No",
-                "Bank Name",
-                "Bank Branch",
-                "Receiving Account",
-                "Reference",
-                "Description",
-            ]
-        ]
-        self.write_to_csv(merged_df, "bill_plan_receipts.csv")
+        advanced_df["Advance Receiving Amount"] = (
+            advanced_df["Paying Amount"] - advanced_df["Total Invoice Amount"]
+        )
+
+        advanced_df = advanced_df[RECEIPTS_ADVANCE_COLS]
+        self.write_to_csv(advanced_df, "receipts_advance.csv")
+        self.logger.info("Advance Receipts generated successfully.")
+
+    def write_bill_plan_receipts(self, tpl_df):
+        bill_pln_df = tpl_df[BILL_PLAN_TPL_COLS].copy()
+        bill_pln_df["Paying Amount"] = bill_pln_df.apply(
+            self.set_bill_plan_paying_amt, axis=1
+        )
+        self.write_to_csv(bill_pln_df, "receipts_bill_plan.csv")
+
+    def set_bill_plan_paying_amt(self, row):
+        paying_amt = row["Paying Amount"]
+        invoice_amt = row["Total Invoice Amount"]
+
+        if paying_amt > invoice_amt:
+            return invoice_amt
+
+        return paying_amt
 
     def get_by_pattern(self, desc, reg):
         content = None
@@ -151,3 +155,10 @@ class CreditSvc(BaseSvc):
                 content = None
 
         return content
+
+    def get_flat_name_mappings(self):
+        parent_dir = get_parent_dir(__file__)
+        name_file = f"{parent_dir}\\config\\flat_name_mappings.json"
+        with open(name_file, "r", encoding="utf-8") as nf:
+            name_mappings = json.loads(nf.read())
+        return name_mappings

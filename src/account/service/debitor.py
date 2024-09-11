@@ -15,6 +15,9 @@ class DebitSvc(BaseSvc):
     def process(self):
         self.logger.info("Processing all Debits")
         dr_df = self.get_cr_dr_rows(self.df, credit=False)
+        if dr_df.empty:
+            self.logger.info("No Debits found. Skipping.")
+            return
 
         dr_df = dr_df.rename(
             columns={
