@@ -6,10 +6,11 @@ import pandas as pd
 from dotenv import load_dotenv
 
 from account.common.api import Api
-from account.common.write_excel import XlsWriter
+from account.writer.write_excel import XlsWriter
 from account.service.creditor import CreditSvc
 from account.service.debitor import DebitSvc
 from account.utils.app_logger import AppLogger
+from account.writer.write_pdf import PdfWriter
 
 load_dotenv()
 
@@ -136,7 +137,13 @@ class Maintenance:
             ]
         ]
 
-        XlsWriter(self.params["base_path"]).write(dues_df)
+        dues_path = self.params["base_path"]
+        dues_path = f"{dues_path}\\Dues"
+        xls_path = XlsWriter(dues_path).write(dues_df, "dues.xlsx")
+
+        cur_date = datetime.now().strftime("%b_%d")
+        PdfWriter(dues_path).write(xls_path, f"dues_{cur_date}.pdf")
+
         self.logger.info("Dues report generated successfully.")
 
     def combine_maint(self, row):
