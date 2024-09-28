@@ -179,9 +179,9 @@ class Maintenance:
 if __name__ == "__main__":
     m_params = {
         "base_path": "D:\\Abiz\\Flats\\Vedanshi\\2024-25\\06. Sep",
-        "stmt_nm": "DetailedStatement-3.pdf",
+        "stmt_nm": "DetailedStatement-4.pdf",
         "tpl_nm": "batch_dues_receipt_upload_5223004_.csv",
-        "start_row": 44,
+        "start_row": 62,
     }
     maint = Maintenance(params=m_params)
     maint.run()
