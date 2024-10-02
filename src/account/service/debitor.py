@@ -90,7 +90,7 @@ class DebitSvc(BaseSvc):
             party = desc.split("/")[-2]
             exp_acc = "Consumables - House Keeping"
             dept = "House Keeping"
-        elif "TREASURER" in desc:
+        elif "TREASURER" in desc or "WATERCANESUPP" in desc:
             desc_split = desc.split("/")[-2]
             party = f"Maintenance - {desc_split}"
             exp_acc = "Consumables - Security / Office"

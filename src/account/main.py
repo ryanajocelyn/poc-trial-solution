@@ -66,6 +66,8 @@ class Maintenance:
 
         df = df.drop(index=[0])
         df["Description"] = df["Description"].str.replace("\n", "")
+        df["Paying Amount"] = df["Paying Amount"].str.replace("\n", "")
+        df["Amount"] = df["Amount"].str.replace("\n", "")
 
         recon_df = df.copy()
         recon_df["Amount"] = recon_df["Amount"].str.replace(",", "")
@@ -113,6 +115,9 @@ class Maintenance:
             # Define the GraphQL query
             data = Api().post("dues", params=api_param)
             data_resp = data["data"]["getDuesReportList"]["dataResponse"]
+            if not data_resp:
+                raise ValueError("API Key not set")
+
             report_header = data_resp["reportHeaders"]
             headers = {head["accessor"]: head["header"] for head in report_header}
             dues_list.extend(data_resp["data"])
@@ -177,11 +182,12 @@ class Maintenance:
 
 
 if __name__ == "__main__":
+    # Start Row - Row to start from
     m_params = {
         "base_path": "D:\\Abiz\\Flats\\Vedanshi\\2024-25\\06. Sep",
-        "stmt_nm": "DetailedStatement-4.pdf",
+        "stmt_nm": "DetailedStatement-5.pdf",
         "tpl_nm": "batch_dues_receipt_upload_5223004_.csv",
-        "start_row": 62,
+        "start_row": 66,
     }
     maint = Maintenance(params=m_params)
     maint.run()
