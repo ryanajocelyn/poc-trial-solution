@@ -1,1 +1,5 @@
 .idea
+/src/ai/ner/model-last/
+/src/ai/ner/transformers/
+/src/account/stmt-iob.json
+/src/ai/ner/model-best/

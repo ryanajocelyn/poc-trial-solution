@@ -1,0 +1,29 @@
+[{
+    "label": "B-MODE",
+    "search": "startswith",
+    "options": ["UPI", "NEFT", "IMPS", "INFT", "CLG", "CAM"]
+}, {
+    "label": "B-BANK",
+    "search": "contains",
+    "options": ["AXIS", "KOTAK", "STATE BANK", "FEDERAL", "HDFCBANK", "STATEBANK", "BANK", "VIVISHTECHNOLO"]
+}, {
+    "label": "B-VPA",
+    "search": "contains",
+    "options": ["@OKAX", "@OKICI", "@OK"]
+}, {
+    "label": "B-FLAT",
+    "search": "flat_no",
+    "options": []
+}, {
+    "label": "B-REFERENCE",
+    "search": "numeric",
+    "options": []
+}, {
+    "label": "B-TRANSACTION",
+    "search": "startswith",
+    "options": ["AXI", "ICI", "SBI", "IDI", "IOB", "HDFC", "CNR", "DBS", "N", "D", "PUNB", "KKBKH", "AXOM", "IBKL"]
+}, {
+    "label": "B-BANK_INT",
+    "search": "contains",
+    "options": ["INT.PD"]
+}]
