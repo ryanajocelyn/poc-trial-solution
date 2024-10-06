@@ -1,18 +1,14 @@
-import json
-import re
-
 import pandas as pd
 
 from account.service.base_svc import BaseSvc
 from account.utils.app_logger import AppLogger
 from account.utils.constants import (
-    FLAT_NOS,
     MAINT_PER_APT,
     BILL_PLAN_TPL_DROP_COLS,
     BILL_PLAN_TPL_COLS,
     RECEIPTS_ADVANCE_COLS,
 )
-from account.utils.utils import get_parent_dir
+from account.utils.utils import parse_house_no
 
 
 class CreditSvc(BaseSvc):
@@ -42,30 +38,13 @@ class CreditSvc(BaseSvc):
     def parse_house(self, row):
         desc = row["Description"]
         if desc.startswith("UPI"):
-            desc = desc.split("/")[2]
+            desc_split = desc.split("/")
+            if desc_split[2] == "UPI":
+                desc = desc_split[1]
+            else:
+                desc = desc_split[2]
 
-        regex = [
-            {"pattern": "(.*)(/A\\d{3})(.*)", "index": 2},
-            {"pattern": "(.*)(\\d{3})(.*)", "index": 2},
-            {"pattern": "(.*)/[a-z]+(\\d{3})[a-z- /]+(.*)", "index": 2},
-            {"pattern": "(.*)[- /a-z]+(\\d{3})[a-z- /]+(.*)", "index": 2},
-            {"pattern": "(.*)[FLAT]+(\\d{3})[a-z- /]+(.*)", "index": 2},
-        ]
-        content = None
-        for reg in regex:
-            content = self.get_by_pattern(desc, reg)
-            if content:
-                break
-
-        # Read the Flat and Owner name mappings
-        name_mappings = self.get_flat_name_mappings()
-
-        if not content:
-            desc = row["Description"]
-            for name, flat in name_mappings.items():
-                if name in desc.upper():
-                    content = flat
-                    break
+        content = parse_house_no(desc)
 
         if content == "106":
             content = "106 & 206"
@@ -123,6 +102,7 @@ class CreditSvc(BaseSvc):
         advanced_df["Advance Receiving Amount"] = (
             advanced_df["Paying Amount"] - advanced_df["Total Invoice Amount"]
         )
+        advanced_df["Advance Type"] = "Advance"
 
         advanced_df = advanced_df[RECEIPTS_ADVANCE_COLS]
         self.write_to_csv(advanced_df, "receipts_advance.csv")
@@ -143,22 +123,3 @@ class CreditSvc(BaseSvc):
             return invoice_amt
 
         return paying_amt
-
-    def get_by_pattern(self, desc, reg):
-        content = None
-        pattern = re.compile(reg["pattern"], flags=re.IGNORECASE)
-        match = pattern.match(desc)
-        if match:
-            content = match.group(reg["index"])
-            content = content.replace("/A", "")
-            if content not in FLAT_NOS:
-                content = None
-
-        return content
-
-    def get_flat_name_mappings(self):
-        parent_dir = get_parent_dir(__file__)
-        name_file = f"{parent_dir}\\config\\flat_name_mappings.json"
-        with open(name_file, "r", encoding="utf-8") as nf:
-            name_mappings = json.loads(nf.read())
-        return name_mappings

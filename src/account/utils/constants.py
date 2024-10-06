@@ -61,6 +61,7 @@ BILL_PLAN_TPL_COLS = [
 RECEIPTS_ADVANCE_COLS = [
     "Sl No",
     "House",
+    "Advance Type",
     "Mode",
     "Cheque number",
     "Bank name",

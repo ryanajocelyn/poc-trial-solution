@@ -4,8 +4,10 @@ from datetime import datetime
 import camelot
 import pandas as pd
 from dotenv import load_dotenv
+from transformers import pipeline
 
 from account.common.api import Api
+from account.common.base import Base
 from account.writer.write_excel import XlsWriter
 from account.service.creditor import CreditSvc
 from account.service.debitor import DebitSvc
@@ -15,8 +17,10 @@ from account.writer.write_pdf import PdfWriter
 load_dotenv()
 
 
-class Maintenance:
+class Maintenance(Base):
     def __init__(self, params):
+        super().__init__()
+
         self.params = params
         self.pdf_path = f"{params['base_path']}\\Statement\\{params['stmt_nm']}"
         self.logger = AppLogger("VOAM")
@@ -26,7 +30,7 @@ class Maintenance:
         self.logger.info(f"Base Path: {self.params['base_path']}")
 
         # Extract all tables from the statement
-        df = self.extract_tables()
+        df = self.extract_statement()
 
         # Process all debits
         debit_svc = DebitSvc(df, self.params)
@@ -38,36 +42,13 @@ class Maintenance:
 
         self.dues()
 
-    def extract_tables(self):
-        tables = camelot.read_pdf(self.pdf_path, pages="all", lattice=True)
+    def extract_statement(self):
+        df = self.parse_statement(self.pdf_path)
 
-        table_df = [tbl.df for tbl in tables]
-        df = pd.concat(table_df, ignore_index=True)
-
-        cols = df.iloc[0].str.replace("\n", " ")
-        df.columns = cols.to_list()
-
-        df["House"] = None
-        df["Mode"] = "EFT"
-        df["Bank Name"] = None
-        df["Bank Branch"] = None
-        df["Reference"] = None
-        df["Receiving Account"] = "ICICI Bank 1166"
-
-        df = df.rename(
-            columns={
-                "Transaction Date": "Receipt Date",
-                "Cheque no / Ref No": "Cheque No",
-                "Deposit (Cr)": "Paying Amount",
-                "Withdra wal (Dr)": "Amount",
-                "Transaction Remarks": "Description",
-            }
-        )
-
-        df = df.drop(index=[0])
-        df["Description"] = df["Description"].str.replace("\n", "")
-        df["Paying Amount"] = df["Paying Amount"].str.replace("\n", "")
-        df["Amount"] = df["Amount"].str.replace("\n", "")
+        if self.params.get("ner", False):
+            remarks = df["Description"].to_list()
+            flats = self.identify_entities(remarks)
+            df["House"] = flats
 
         recon_df = df.copy()
         recon_df["Amount"] = recon_df["Amount"].str.replace(",", "")
@@ -91,8 +72,31 @@ class Maintenance:
             df = df[df["Sl No"] >= start_row]
             df = df.reset_index(drop=True)
 
-        self.logger.info(f"Tables Extracted: Rows = {len(df)}")
+        self.logger.info(f"Tables Extracted after Filter: Rows = {len(df)}")
         return df
+
+    def identify_entities(self, remarks):
+        model_output_checkpoint = "D:\\Abiz\\Technical\\code\\python\\poc-trial-solution\\src\\ai\\ner\\transformers\\nfl_pbp_token_classifier"
+        classifier = pipeline(
+            "ner", model=model_output_checkpoint, aggregation_strategy="simple"
+        )
+        responses = classifier(remarks)
+        flats = []
+        ents = []
+        for ind, row in enumerate(responses):
+            ents_row = []
+            flat = None
+            for ent in row:
+                if ent["entity_group"] == "FLAT":
+                    flat = f"Apt-{ent['word']}"
+
+                ents_row.append({ent["entity_group"]: ent["word"]})
+
+            print(flat, remarks[ind], ents_row)
+            flats.append(flat)
+            ents.append(ents_row)
+        print(ents)
+        return flats
 
     def dues(self):
         dues_list = []
@@ -184,11 +188,17 @@ class Maintenance:
 if __name__ == "__main__":
     # Start Row - Row to start from
     m_params = {
-        "base_path": "D:\\Abiz\\Flats\\Vedanshi\\2024-25\\06. Sep",
-        "stmt_nm": "DetailedStatement-5.pdf",
-        "tpl_nm": "batch_dues_receipt_upload_5223004_.csv",
-        "start_row": 66,
+        "base_path": "D:\\Abiz\\Flats\\Vedanshi\\2024-25\\10. Oct",
+        "stmt_nm": "DetailedStatement-1.pdf",
+        "tpl_nm": "batch_dues_receipt_upload_5337437_.csv",
+        "start_row": 0,
+        "ner": False,
     }
     maint = Maintenance(params=m_params)
     maint.run()
     # maint.test()
+
+    remarks = [
+        "INF/INFT/037461885331/A8032736ad15fb5ba3a94a8eae0844906c/VIVISHTECHNOLO"
+    ]
+    # maint.identify_entities(remarks)
