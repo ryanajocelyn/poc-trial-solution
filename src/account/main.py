@@ -63,7 +63,7 @@ class Maintenance(Base):
         )
 
         credit_svc = CreditSvc(pd.DataFrame(), self.params)
-        credit_svc.write_to_csv(recon_df, "reconcilation.csv", header=False)
+        credit_svc.write_to_csv(recon_df, "reconcilation.csv", header=False, index="06")
 
         start_row = self.params.get("start_row", 0)
         if start_row > 0:
@@ -187,10 +187,10 @@ class Maintenance(Base):
 if __name__ == "__main__":
     # Start Row - Row to start from
     m_params = {
-        "base_path": "D:\\Abiz\\Flats\\Vedanshi\\2024-25\\10. Oct",
-        "stmt_nm": "DetailedStatement-1.pdf",
+        "base_path": "D:\\Abiz\\Flats\\Vedanshi\\2024-25\\07. Oct",
+        "stmt_nm": "DetailedStatement-2.pdf",
         "tpl_nm": "batch_dues_receipt_upload_5337437_.csv",
-        "start_row": 0,
+        "start_row": 42,
         "ner": False,
     }
     maint = Maintenance(params=m_params)

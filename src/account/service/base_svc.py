@@ -78,8 +78,8 @@ class BaseSvc(ABC):
             cr_df[field] = cr_df[field].str.replace(",", "")
             cr_df[field] = cr_df[field].astype(float)
 
-    def write_to_csv(self, cr_df, file_nm, header=True):
-        file_path = f"{self.params['base_path']}\\MyGate\\mygate_{file_nm}"
+    def write_to_csv(self, cr_df, file_nm, header=True, index="01"):
+        file_path = f"{self.params['base_path']}\\MyGate\\{index}_mygate_{file_nm}"
         cr_df.to_csv(file_path, index=False, header=header)
         self.logger.info(f"Template file exported: {file_nm}")
 

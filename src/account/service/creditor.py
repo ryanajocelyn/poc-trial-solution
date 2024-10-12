@@ -31,20 +31,28 @@ class CreditSvc(BaseSvc):
             cr_df, date_fields=["Receipt Date"], floats=["Paying Amount"]
         )
 
-        self.write_to_csv(cr_df, "receipts_dues.csv")
+        self.write_to_csv(cr_df, "dues_receipt.csv", index="01")
 
         self.gen_bill_plan_template(cr_df)
 
     def parse_house(self, row):
         desc = row["Description"]
+        is_upi = False
         if desc.startswith("UPI"):
+            is_upi = True
             desc_split = desc.split("/")
             if desc_split[2] == "UPI":
                 desc = desc_split[1]
+                for desc_item in desc_split:
+                    if "@" in desc_item:
+                        desc = desc_item
+                        break
             else:
                 desc = desc_split[2]
 
         content = parse_house_no(desc)
+        if not content and is_upi:
+            content = parse_house_no(row["Description"])
 
         if content == "106":
             content = "106 & 206"
@@ -105,7 +113,7 @@ class CreditSvc(BaseSvc):
         advanced_df["Advance Type"] = "Advance"
 
         advanced_df = advanced_df[RECEIPTS_ADVANCE_COLS]
-        self.write_to_csv(advanced_df, "receipts_advance.csv")
+        self.write_to_csv(advanced_df, "house_advance.csv", index="03")
         self.logger.info("Advance Receipts generated successfully.")
 
     def write_bill_plan_receipts(self, tpl_df):
@@ -113,7 +121,7 @@ class CreditSvc(BaseSvc):
         bill_pln_df["Paying Amount"] = bill_pln_df.apply(
             self.set_bill_plan_paying_amt, axis=1
         )
-        self.write_to_csv(bill_pln_df, "receipts_bill_plan.csv")
+        self.write_to_csv(bill_pln_df, "dues_receipt_batch_bill_plan.csv", index="02")
 
     def set_bill_plan_paying_amt(self, row):
         paying_amt = row["Paying Amount"]

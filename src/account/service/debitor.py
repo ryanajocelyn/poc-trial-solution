@@ -66,7 +66,7 @@ class DebitSvc(BaseSvc):
 
         dr_df = dr_df.drop(dr_df[dr_df["Party"].isnull()].index)
 
-        self.write_to_csv(dr_df, "payments.csv")
+        self.write_to_csv(dr_df, "general_payments.csv", index="04")
 
     def parse_debit_ac(self, row):
         desc = row["Description"]
@@ -183,7 +183,7 @@ class DebitSvc(BaseSvc):
             ]
         ]
 
-        self.write_to_csv(bk_exp_df, "bk_expenses.csv")
+        self.write_to_csv(bk_exp_df, "vendor_expense.csv", index="05")
 
     def set_gst_amt(self, row):
         amt = row["Amount"]
