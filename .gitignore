@@ -3,3 +3,4 @@
 /src/ai/ner/transformers/
 /src/account/stmt-iob.json
 /src/ai/ner/model-best/
+__pycache__

@@ -190,7 +190,7 @@ if __name__ == "__main__":
         "base_path": "D:\\Abiz\\Flats\\Vedanshi\\2024-25\\07. Oct",
         "stmt_nm": "DetailedStatement-2.pdf",
         "tpl_nm": "batch_dues_receipt_upload_5337437_.csv",
-        "start_row": 42,
+        "start_row": 0,
         "ner": False,
     }
     maint = Maintenance(params=m_params)
