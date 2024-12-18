@@ -52,10 +52,13 @@ class Maintenance(Base):
         recon_df = df.copy()
         recon_df["Amount"] = recon_df["Amount"].str.replace(",", "")
         recon_df["Paying Amount"] = recon_df["Paying Amount"].str.replace(",", "")
+        recon_df["TransactionPostedDate"] = pd.to_datetime(
+            recon_df["TransactionPostedDate"], format="%d/%m/%Y%H:%M:%S %p"
+        ).dt.strftime("%d/%m/%Y")
 
         recon_df.rename(
             columns={
-                "Transaction Posted Date": "Transaction Date",
+                "TransactionPostedDate": "Transaction Date",
                 "Amount": "Withdrawal",
                 "Paying Amount": "Deposit",
             },
@@ -187,9 +190,9 @@ class Maintenance(Base):
 if __name__ == "__main__":
     # Start Row - Row to start from
     m_params = {
-        "base_path": "D:\\Abiz\\Flats\\Vedanshi\\2024-25\\07. Oct",
-        "stmt_nm": "DetailedStatement-2.pdf",
-        "tpl_nm": "batch_dues_receipt_upload_5337437_.csv",
+        "base_path": "D:\\Abiz\\Flats\\Vedanshi\\2024-25\\09. Dec",
+        "stmt_nm": "DetailedStatement-1.pdf",
+        "tpl_nm": "batch_dues_receipt_upload_5587509_.csv",
         "start_row": 0,
         "ner": False,
     }

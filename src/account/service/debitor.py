@@ -81,6 +81,11 @@ class DebitSvc(BaseSvc):
             party = f"Housekeeping Staff Salary - {person.capitalize()}"
             exp_acc = "Personnel - Housekeeping"
             dept = "House Keeping"
+        elif "PESTCONTROL" in desc:
+            person = desc.split("/")[-1]
+            party = f"Pest Control - {person.capitalize()}"
+            exp_acc = "Personnel - Common Labour"
+            dept = "Common Area"
         elif "SURENDARPLUMBER" in desc:
             reason = desc.split("/")[-2]
             party = f"Plumbing Expenses - {reason}"
@@ -117,7 +122,7 @@ class DebitSvc(BaseSvc):
             item_nm = "Security Expenses"
             dept = "Security"
             purchase_ac = "Security"
-        elif "CHENNAI ME" in desc or "CWSS" in desc:
+        elif "CHENNAI ME" in desc or "CWSS" in desc or "CHENNAIME" in desc:
             vendor = "Metro Water Corporation"
             item_nm = "Metro Water Expenses"
             dept = "Common Area"
@@ -132,6 +137,11 @@ class DebitSvc(BaseSvc):
             item_nm = "Garbage Collection Expenses"
             dept = "Common Area"
             purchase_ac = "Corporation Garbage Cleaning"
+        elif "DGSRVICES" in desc:
+            vendor = "J N MACHINERIES PRIVATE LIMITED"
+            item_nm = "Generator Service and Expenses"
+            dept = "Common Area"
+            purchase_ac = "Consumables - Generator"
 
         return vendor, item_nm, dept, purchase_ac
 
