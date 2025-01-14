@@ -142,6 +142,11 @@ class DebitSvc(BaseSvc):
             item_nm = "Generator Service and Expenses"
             dept = "Common Area"
             purchase_ac = "Consumables - Generator"
+        elif "SERVICELIFTS" in desc:
+            vendor = "Johnson Elevators"
+            item_nm = "Johnson Elevator Expenses"
+            dept = "Common Area"
+            purchase_ac = "Elevator"
 
         return vendor, item_nm, dept, purchase_ac
 
