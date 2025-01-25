@@ -22,7 +22,8 @@ jobs:
 
       - name: Commit and Push Version Update
         run: |
-          if [ ${{ github.ref }} == 'refs/heads/main' ] then
+          if [ ${{ github.ref == 'refs/heads/main' }} ] 
+          then
             echo "REF=${{ github.ref }}"
             poetry version patch
           fi
