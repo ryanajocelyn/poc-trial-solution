@@ -91,6 +91,11 @@ class DebitSvc(BaseSvc):
             party = f"Plumbing Expenses - {reason}"
             exp_acc = "Personnel - Plumber"
             dept = "Common Area"
+        elif "SUDHAKAR" in desc:
+            reason = desc.split("/")[-2]
+            party = f"Gardening Expenses - {reason}"
+            exp_acc = "Consumables - Gardening"
+            dept = "Common Area"
         elif "KDLE" in desc:
             party = desc.split("/")[-2]
             exp_acc = "Consumables - House Keeping"
@@ -117,7 +122,7 @@ class DebitSvc(BaseSvc):
         desc = row["Description"]
 
         vendor, item_nm, dept, purchase_ac = None, None, None, None
-        if "MDARAFATH" in desc:
+        if "MDARAFATH" in desc or "SECURITYANEES" in desc:
             vendor = "ACare Security Services"
             item_nm = "Security Expenses"
             dept = "Security"
