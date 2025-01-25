@@ -23,7 +23,7 @@ jobs:
       - name: Commit and Push Version Update
         run: |
           poetry version patch
-          git config user.name "ryana.jocelyn"
+          git config user.name "ryanajocelyn"
           git config user.email "abijeet.darwin@gmail.com"
           git add pyproject.toml
           git commit -m "Bump version in pyproject.toml"
