@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "poc-trial-solution"
-version = "0.1.2"
+version = "0.1.3"
 description = "POC Trials projects for problems and self learning."
 license = "MIT"
 authors = ["AbijeethDarwin <code@example.com>"]
