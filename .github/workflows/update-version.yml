@@ -1,0 +1,30 @@
+name: Update Version on Merge
+
+on:
+  push:
+    branches:
+      - main  # Replace with your branch name
+
+jobs:
+  update-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+
+      - name: Install dependencies
+        run: pip install poetry
+
+      - name: Commit and Push Version Update
+        run: |
+          poetry version patch
+          git config user.name "ryana.jocelyn"
+          git config user.email "abijeet.darwin@gmail.com"
+          git add pyproject.toml
+          git commit -m "Bump version in pyproject.toml"
+          git push origin main
