@@ -4,3 +4,4 @@
 /src/account/stmt-iob.json
 /src/ai/ner/model-best/
 __pycache__
+.env
