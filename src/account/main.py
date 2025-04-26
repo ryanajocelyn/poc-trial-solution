@@ -125,7 +125,8 @@ class Maintenance(Base):
                 raise ValueError("API Key not set")
 
             report_header = data_resp["reportHeaders"]
-            headers = {head["accessor"]: head["header"] for head in report_header}
+            tmp_headers = {head["accessor"]: head["header"] for head in report_header}
+            headers.update(tmp_headers)
             dues_list.extend(data_resp["data"])
 
         full_dues_df = pd.DataFrame(dues_list)
@@ -136,17 +137,17 @@ class Maintenance(Base):
 
         dues_df["Maintenance Charge"] = dues_df.apply(self.combine_maint, axis=1)
 
-        dues_df = dues_df[
-            [
-                "Unit",
-                "Owner Name",
-                "Maintenance Charge",
-                "Metro Water - 2020",
-                "Late Payment Fine",
-                "Move in/out - Incidental Charges",
-                "Total Dues",
-            ]
+        dues_cols = [
+            "Unit",
+            "Owner Name",
+            "Maintenance Charge",
+            "Metro Water - 2020",
+            "Late Payment Fine",
+            "Move in/out - Incidental Charges",
+            "Total Dues",
         ]
+
+        dues_df = dues_df[dues_cols]
 
         dues_path = self.params["base_path"]
         dues_path = f"{dues_path}\\Dues"
@@ -190,9 +191,9 @@ class Maintenance(Base):
 if __name__ == "__main__":
     # Start Row - Row to start from
     m_params = {
-        "base_path": "D:\\Abiz\\Flats\\Vedanshi\\2024-25\\12. Mar",
+        "base_path": "D:\\Abiz\\Flats\\Vedanshi\\2025-26\\01. Apr",
         "stmt_nm": "DetailedStatement-1.pdf",
-        "tpl_nm": "batch_dues_receipt_upload_5986664_.csv",
+        "tpl_nm": "batch_dues_receipt_upload_6141316_.csv",
         "start_row": 0,
         "ner": False,
     }

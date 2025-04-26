@@ -142,6 +142,11 @@ class DebitSvc(BaseSvc):
             item_nm = "Garbage Collection Expenses"
             dept = "Common Area"
             purchase_ac = "Corporation Garbage Cleaning"
+        elif "MYGATE" in desc:
+            vendor = "MyGate Vivish"
+            item_nm = "MyGate Annual Subscription"
+            dept = "Common Area"
+            purchase_ac = "MyGate"
         elif "DGSRVICES" in desc:
             vendor = "J N MACHINERIES PRIVATE LIMITED"
             item_nm = "Generator Service and Expenses"
