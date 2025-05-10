@@ -30,3 +30,4 @@ matplotlib==3.9.2
 nltk==3.9.1
 pdfplumber==0.11.4
 numpy==2.1.1
+borb==2.1.25

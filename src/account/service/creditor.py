@@ -57,6 +57,9 @@ class CreditSvc(BaseSvc):
         if content == "106":
             content = "106 & 206"
 
+        if content == "903" and "NEDUMARAN" in desc:
+            content = "904"
+
         return f"Apt-{content}"
 
     def handle_dual_house(self, cr_df, house1, house2):

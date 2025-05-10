@@ -72,7 +72,7 @@ class DebitSvc(BaseSvc):
         desc = row["Description"]
         party, exp_acc, dept = None, None, None
 
-        if "FAHAD" in desc:
+        if "MGRMANI" in desc:
             party = "Manager Salary"
             exp_acc = "Manager"
             dept = "Accounts"

@@ -48,6 +48,8 @@ class BaseSvc(ABC):
                 ref = desc.split("-")[1]
             else:
                 ref = desc.split("/")[0]
+        elif desc.startswith("INF/NEFT"):
+            ref = desc.split("/")[2]
         elif desc.startswith("UPI"):
             desc_split = desc.split("/")
 
