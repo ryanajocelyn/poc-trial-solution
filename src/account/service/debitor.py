@@ -19,6 +19,9 @@ class DebitSvc(BaseSvc):
             self.logger.info("No Debits found. Skipping.")
             return
 
+        dr_df["Reference"] = dr_df.apply(self.parse_reference, axis=1)
+        dr_df = self.process_cash_bank(dr_df)
+
         dr_df = dr_df.rename(
             columns={
                 "Receipt Date": "Date(dd-mm-yyyy)",
@@ -47,7 +50,6 @@ class DebitSvc(BaseSvc):
             ]
         ]
 
-        dr_df["Reference"] = dr_df.apply(self.parse_reference, axis=1)
         dr_df[["Party", "Expense Account", "Department"]] = dr_df.apply(
             self.parse_debit_ac, axis=1
         ).to_list()
@@ -67,6 +69,44 @@ class DebitSvc(BaseSvc):
         dr_df = dr_df.drop(dr_df[dr_df["Party"].isnull()].index)
 
         self.write_to_csv(dr_df, "general_payments.csv", index="04")
+
+    def process_cash_bank(self, dr_df):
+        cb_df = dr_df[dr_df["Description"].str.contains("TREASURER")]
+        cb_df["To Account"] = "Cash"
+        cb_df["Cheque Date"] = None
+        cb_df = cb_df[
+            [
+                "Sl No",
+                "Receipt Date",
+                "Receiving Account",
+                "To Account",
+                "Reference",
+                "Cheque No",
+                "Cheque Date",
+                "Amount",
+                "Description",
+            ]
+        ]
+        cb_df.rename(
+            columns={
+                "Sl No": "row",
+                "Receipt Date": "Date",
+                "Receiving Account": "From Account",
+                "Cheque No": "Cheque Number",
+            },
+            inplace=True,
+        )
+        self.format_fields(
+            cb_df,
+            date_fields=["Date"],
+            floats=["Amount"],
+            date_format="%d-%m-%Y",
+        )
+
+        self.write_to_csv(cb_df, "cash_bank_transfer.csv", index="07")
+
+        dr_df = dr_df[~dr_df["Description"].str.contains("TREASURER")]
+        return dr_df
 
     def parse_debit_ac(self, row):
         desc = row["Description"]

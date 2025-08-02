@@ -24,7 +24,7 @@ class CreditSvc(BaseSvc):
         cr_df["House"] = cr_df.apply(self.parse_house, axis=1)
         cr_df["Reference"] = cr_df.apply(self.parse_reference, axis=1)
 
-        for house1, house2 in [("903", "107A"), ("607", "608")]:
+        for house1, house2 in [("903", "1071"), ("607", "608")]:
             cr_df = self.handle_dual_house(cr_df, house1, house2)
 
         self.format_fields(
