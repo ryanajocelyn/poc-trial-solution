@@ -1,0 +1,68 @@
+[{
+  "vendor_type": ["MDARAFATH", "SECURITYANEES"],
+  "vendor": "ACare Security Services",
+  "item_nm": "Security Expenses",
+  "dept": "Security",
+  "purchase_ac": "Security",
+  "gst": false
+}, {
+  "vendor_type": ["CHENNAI ME", "CWSS", "CHENNAIME"],
+  "vendor": "Metro Water Corporation",
+  "item_nm": "Metro Water Expenses",
+  "dept": "Common Area",
+  "purchase_ac": "Metro Water"
+},{
+  "vendor_type": ["BBPS"],
+  "vendor": "TANGEDCO Electricity",
+  "item_nm": "Electricity Expenses",
+  "dept": "Electrical",
+  "purchase_ac": "TNEB"
+},{
+  "vendor_type": ["BIGBIN"],
+  "vendor": "Big Bin Garbage",
+  "item_nm": "Garbage Collection Expenses",
+  "dept": "Common Area",
+  "purchase_ac": "Corporation Garbage Cleaning"
+},{
+  "vendor_type": ["MYGATE"],
+  "vendor": "MyGate Vivish",
+  "item_nm": "MyGate Annual Subscription",
+  "dept": "Common Area",
+  "purchase_ac": "MyGate"
+},{
+  "vendor_type": ["DGSRVICES"],
+  "vendor": "J N MACHINERIES PRIVATE LIMITED",
+  "item_nm": "Generator Service and Expenses",
+  "dept": "Common Area",
+  "purchase_ac": "Consumables - Generator"
+},{
+  "vendor_type": ["SERVICELIFTS"],
+  "vendor": "Johnson Elevators",
+  "item_nm": "Johnson Elevator Expenses",
+  "dept": "Common Area",
+  "purchase_ac": "Elevator"
+},{
+  "vendor_type": ["KDLE"],
+  "vendor": "KDL e-Store",
+  "item_nm": "Housekeeping Materials Expenses",
+  "dept": "House Keeping",
+  "purchase_ac": "Consumables - House Keeping"
+},{
+  "vendor_type": ["MIRRORSHEET"],
+  "vendor": "SupremePly Enterprises",
+  "item_nm": "Gym Room Expenses",
+  "dept": "Common Area",
+  "purchase_ac": "Personnel - Gym"
+},{
+  "vendor_type": ["EXTINGUISHER"],
+  "vendor": "Safety Shield",
+  "item_nm": "Fire Refilling",
+  "dept": "Common Area",
+  "purchase_ac": "Consumables - FireSafety"
+},{
+  "vendor_type": ["OM", "CARPENTARYWORK"],
+  "vendor": "Sri Om Furniture",
+  "item_nm": "Gym Room Expenses",
+  "dept": "Common Area",
+  "purchase_ac": "Personnel - Gym"
+}]

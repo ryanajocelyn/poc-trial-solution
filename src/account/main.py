@@ -3,7 +3,6 @@ from datetime import datetime
 
 import pandas as pd
 from dotenv import load_dotenv
-from transformers import pipeline
 
 from account.common.api import Api
 from account.common.base import Base
@@ -44,10 +43,9 @@ class Maintenance(Base):
     def extract_statement(self):
         df = self.parse_statement(self.pdf_path)
 
-        if self.params.get("ner", False):
-            remarks = df["Description"].to_list()
-            flats = self.identify_entities(remarks)
-            df["House"] = flats
+        # if self.params.get("ner", False):
+        #     flats = NerPredit(df).identify_entities()
+        #     df["House"] = flats
 
         recon_df = df.copy()
         recon_df["Amount"] = recon_df["Amount"].str.replace(",", "")
@@ -76,29 +74,6 @@ class Maintenance(Base):
 
         self.logger.info(f"Tables Extracted after Filter: Rows = {len(df)}")
         return df
-
-    def identify_entities(self, remarks):
-        model_output_checkpoint = "D:\\Abiz\\Technical\\code\\python\\poc-trial-solution\\src\\ai\\ner\\transformers\\nfl_pbp_token_classifier"
-        classifier = pipeline(
-            "ner", model=model_output_checkpoint, aggregation_strategy="simple"
-        )
-        responses = classifier(remarks)
-        flats = []
-        ents = []
-        for ind, row in enumerate(responses):
-            ents_row = []
-            flat = None
-            for ent in row:
-                if ent["entity_group"] == "FLAT":
-                    flat = f"Apt-{ent['word']}"
-
-                ents_row.append({ent["entity_group"]: ent["word"]})
-
-            print(flat, remarks[ind], ents_row)
-            flats.append(flat)
-            ents.append(ents_row)
-        print(ents)
-        return flats
 
     def dues(self):
         dues_list = []
@@ -191,10 +166,10 @@ class Maintenance(Base):
 if __name__ == "__main__":
     # Start Row - Row to start from
     m_params = {
-        "base_path": "D:\\Abiz\\Flats\\Vedanshi\\2025-26\\04. Jul",
-        "stmt_nm": "DetailedStatement-Jul25-2.pdf",
-        "tpl_nm": "batch_dues_receipt_upload_6612545_.csv",
-        "start_row": 0,
+        "base_path": "D:\\Abiz\\Flats\\Vedanshi\\2025-26\\02. May",
+        "stmt_nm": "DetailedStatement-May25-2.pdf",
+        "tpl_nm": "batch_dues_receipt_upload_6288477_.csv",
+        "start_row": 54,
         "ner": False,
     }
     maint = Maintenance(params=m_params)

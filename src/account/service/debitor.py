@@ -1,9 +1,11 @@
 from datetime import datetime, timedelta
+from functools import partial
 
 from pandas import DataFrame
 
 from account.service.base_svc import BaseSvc
 from account.utils.app_logger import AppLogger
+from account.utils.utils import get_vendor_expenses
 
 
 class DebitSvc(BaseSvc):
@@ -61,12 +63,23 @@ class DebitSvc(BaseSvc):
             date_format="%d-%m-%Y",
         )
 
-        bk_exp_df = dr_df[dr_df["Party"].isnull()].copy()
-        bk_exp_df = bk_exp_df.reset_index(drop=True)
-        if not bk_exp_df.empty:
-            self.create_book_expense_template(bk_exp_df)
+        dr_df = self.create_book_expense_template(dr_df)
 
         dr_df = dr_df.drop(dr_df[dr_df["Party"].isnull()].index)
+        dr_df = dr_df[
+            [
+                "Date(dd-mm-yyyy)",
+                "Party",
+                "Expense Account",
+                "Paying Account",
+                "Cheque no.",
+                "Cheque date(dd-mm-yyyy)",
+                "Department",
+                "Reference",
+                "Description",
+                "Amount",
+            ]
+        ]
 
         self.write_to_csv(dr_df, "general_payments.csv", index="04")
 
@@ -126,20 +139,16 @@ class DebitSvc(BaseSvc):
             party = f"Pest Control - {person.capitalize()}"
             exp_acc = "Personnel - Common Labour"
             dept = "Common Area"
-        elif "SURENDARPLUMBER" in desc:
+        elif "PLUMBER" in desc:
             reason = desc.split("/")[-2]
             party = f"Plumbing Expenses - {reason}"
             exp_acc = "Personnel - Plumber"
-            dept = "Common Area"
+            dept = "Plumbing"
         elif "SUDHAKAR" in desc:
             reason = desc.split("/")[-2]
             party = f"Gardening Expenses - {reason}"
             exp_acc = "Consumables - Gardening"
             dept = "Common Area"
-        elif "KDLE" in desc:
-            party = desc.split("/")[-2]
-            exp_acc = "Consumables - House Keeping"
-            dept = "House Keeping"
         elif "TREASURER" in desc or "WATERCANESUPP" in desc:
             desc_split = desc.split("/")[-2]
             party = f"Maintenance - {desc_split}"
@@ -155,76 +164,83 @@ class DebitSvc(BaseSvc):
             party = f"Diesel - {desc_split}"
             exp_acc = "Diesel"
             dept = "Common Area"
+        elif "RAJANASST" in desc:
+            desc_split = desc.split("/")[-2]
+            party = f"Auditor Fees - {desc_split}"
+            exp_acc = "Auditor"
+            dept = "Accounts"
+        elif "DEVIWATERTANK" in desc:
+            desc_split = desc.split("/")[-2]
+            party = f"Lorry Water Charges - {desc_split}"
+            exp_acc = "Metro Water"
+            dept = "Common Area"
 
         return party, exp_acc, dept
 
-    def set_expense_ac(self, row):
+    def set_expense_ac(self, vendor_exps, row):
         desc = row["Description"]
 
+        vendor_exp = None
+        for exp in vendor_exps:
+            exp_items = exp["vendor_type"]
+            for item in exp_items:
+                if item in desc:
+                    vendor_exp = exp
+                    break
+
+            if vendor_exp:
+                break
+
+        party = desc.split("/")[-2]
+        amount, sgst, cgst = row["Amount"], 0, 0
         vendor, item_nm, dept, purchase_ac = None, None, None, None
-        if "MDARAFATH" in desc or "SECURITYANEES" in desc:
-            vendor = "ACare Security Services"
-            item_nm = "Security Expenses"
-            dept = "Security"
-            purchase_ac = "Security"
-        elif "CHENNAI ME" in desc or "CWSS" in desc or "CHENNAIME" in desc:
-            vendor = "Metro Water Corporation"
-            item_nm = "Metro Water Expenses"
-            dept = "Common Area"
-            purchase_ac = "Metro Water"
-        elif "BBPS" in desc:
-            vendor = "TANGEDCO Electricity"
-            item_nm = "Electricity Expenses"
-            dept = "Electrical"
-            purchase_ac = "TNEB"
-        elif "BIGBIN" in desc:
-            vendor = "Big Bin Garbage"
-            item_nm = "Garbage Collection Expenses"
-            dept = "Common Area"
-            purchase_ac = "Corporation Garbage Cleaning"
-        elif "MYGATE" in desc:
-            vendor = "MyGate Vivish"
-            item_nm = "MyGate Annual Subscription"
-            dept = "Common Area"
-            purchase_ac = "MyGate"
-        elif "DGSRVICES" in desc:
-            vendor = "J N MACHINERIES PRIVATE LIMITED"
-            item_nm = "Generator Service and Expenses"
-            dept = "Common Area"
-            purchase_ac = "Consumables - Generator"
-        elif "SERVICELIFTS" in desc:
-            vendor = "Johnson Elevators"
-            item_nm = "Johnson Elevator Expenses"
-            dept = "Common Area"
-            purchase_ac = "Elevator"
+        if vendor_exp:
+            vendor = vendor_exp["vendor"]
+            item_nm = vendor_exp["item_nm"]
+            dept = vendor_exp["dept"]
+            purchase_ac = vendor_exp["purchase_ac"]
 
-        return vendor, item_nm, dept, purchase_ac
+            if vendor_exp.get("gst", True):
+                amount, sgst, cgst = self.set_gst_amt(row)
 
-    def create_book_expense_template(self, bk_exp_df):
+        return party, vendor, item_nm, dept, purchase_ac, amount, sgst, cgst
+
+    def create_book_expense_template(self, dr_df):
         self.logger.info("Book Expense template creation started.")
 
-        bk_exp_df["Delivery Date(dd-mm-yyyy)"] = bk_exp_df["Date(dd-mm-yyyy)"]
-        bk_exp_df["Expense Creation Date(dd-mm-yyyy)"] = bk_exp_df["Date(dd-mm-yyyy)"]
-        bk_exp_df["Bill Date(dd-mm-yyyy)"] = bk_exp_df["Date(dd-mm-yyyy)"]
-        bk_exp_df["Due Date(dd-mm-yyyy)"] = bk_exp_df.apply(self.set_due_date, axis=1)
+        dr_df["Delivery Date(dd-mm-yyyy)"] = dr_df["Date(dd-mm-yyyy)"]
+        dr_df["Expense Creation Date(dd-mm-yyyy)"] = dr_df["Date(dd-mm-yyyy)"]
+        dr_df["Bill Date(dd-mm-yyyy)"] = dr_df["Date(dd-mm-yyyy)"]
+        dr_df["Due Date(dd-mm-yyyy)"] = dr_df.apply(self.set_due_date, axis=1)
 
-        bk_exp_df["Deduction Amount"] = None
-        bk_exp_df["Reason for deduction"] = None
-        bk_exp_df["Bill Number"] = None
-        bk_exp_df["IGST Amount"] = None
-        bk_exp_df["TDS Amount"] = None
+        dr_df["Deduction Amount"] = None
+        dr_df["Reason for deduction"] = None
+        dr_df["Bill Number"] = None
+        dr_df["IGST Amount"] = None
+        dr_df["TDS Amount"] = None
+        dr_df["Total Amount"] = dr_df["Amount"]
 
-        bk_exp_df[["Amount", "SGST Amount", "CGST Amount"]] = bk_exp_df.apply(
-            self.set_gst_amt, axis=1
-        ).to_list()
-        bk_exp_df[["Vendor", "Item name", "Departments", "Purchase Account"]] = (
-            bk_exp_df.apply(self.set_expense_ac, axis=1).to_list()
-        )
-        bk_exp_df["Sl No"] = 1
+        vendor_exp = get_vendor_expenses()
+        expenses_fn = partial(self.set_expense_ac, vendor_exp)
 
-        for idx, row in bk_exp_df.iterrows():
-            bk_exp_df.at[idx, "Sl No"] = idx
+        cols = [
+            "Party",
+            "Vendor",
+            "Item name",
+            "Departments",
+            "Purchase Account",
+            "Amount",
+            "SGST Amount",
+            "CGST Amount",
+        ]
+        dr_df[cols] = dr_df.apply(expenses_fn, axis=1).to_list()
+        dr_df["Sl No"] = 1
 
+        for idx, row in dr_df.iterrows():
+            dr_df.at[idx, "Sl No"] = idx
+
+        bk_exp_df = dr_df[~dr_df["Vendor"].isnull()].copy()
+        bk_exp_df = bk_exp_df.reset_index(drop=True)
         bk_exp_df = bk_exp_df[
             [
                 "Sl No",
@@ -249,6 +265,10 @@ class DebitSvc(BaseSvc):
         ]
 
         self.write_to_csv(bk_exp_df, "vendor_expense.csv", index="05")
+
+        dr_df = dr_df[dr_df["Vendor"].isnull()].copy()
+        dr_df["Amount"] = dr_df["Total Amount"]
+        return dr_df
 
     def set_gst_amt(self, row):
         amt = row["Amount"]
