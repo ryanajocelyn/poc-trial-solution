@@ -6,7 +6,7 @@ class NerPredit:
         self.df = df
 
     def identify_entities(self):
-        remarks = df["Description"].to_list()
+        remarks = self.df["Description"].to_list()
 
         model_output_checkpoint = "D:\\Abiz\\Technical\\code\\python\\poc-trial-solution\\src\\ai\\ner\\transformers\\nfl_pbp_token_classifier"
         classifier = pipeline(
