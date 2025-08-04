@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from functools import partial
 
+import pandas as pd
 from pandas import DataFrame
 
 from account.service.base_svc import BaseSvc
@@ -264,6 +265,26 @@ class DebitSvc(BaseSvc):
             ]
         ]
 
+        final_exps = {}
+        exp_list = bk_exp_df.to_dict(orient="records")
+        for exp in exp_list:
+            con_exp = final_exps.get(exp["Vendor"])
+            if not con_exp:
+                con_exp = exp
+                final_exps[exp["Vendor"]] = con_exp
+            else:
+                con_exp["Amount"] = con_exp["Amount"] + exp["Amount"]
+                con_exp["SGST Amount"] = con_exp["SGST Amount"] + exp["SGST Amount"]
+                con_exp["CGST Amount"] = con_exp["CGST Amount"] + exp["CGST Amount"]
+
+                if exp["IGST Amount"]:
+                    con_exp["IGST Amount"] = con_exp["IGST Amount"] + exp["IGST Amount"]
+
+                if exp["TDS Amount"]:
+                    con_exp["TDS Amount"] = con_exp["TDS Amount"] + exp["TDS Amount"]
+
+        bk_exp_df = pd.DataFrame(list(final_exps.values()))
+        bk_exp_df.reset_index(inplace=True)
         self.write_to_csv(bk_exp_df, "vendor_expense.csv", index="05")
 
         dr_df = dr_df[dr_df["Vendor"].isnull()].copy()

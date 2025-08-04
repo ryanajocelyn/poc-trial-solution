@@ -1,4 +1,11 @@
 [{
+  "vendor_type": ["AHSHAYA"],
+  "vendor": "Akshaya Security Services",
+  "item_nm": "Security Expenses",
+  "dept": "Security",
+  "purchase_ac": "Security",
+  "gst": false
+},{
   "vendor_type": ["MDARAFATH", "SECURITYANEES"],
   "vendor": "ACare Security Services",
   "item_nm": "Security Expenses",
@@ -39,6 +46,12 @@
   "vendor_type": ["SERVICELIFTS"],
   "vendor": "Johnson Elevators",
   "item_nm": "Johnson Elevator Expenses",
+  "dept": "Common Area",
+  "purchase_ac": "Elevator"
+},{
+  "vendor_type": ["THYSON"],
+  "vendor": "Thyssen Krupp Elevators",
+  "item_nm": "Thyssen Krupp Elevator Expenses",
   "dept": "Common Area",
   "purchase_ac": "Elevator"
 },{
