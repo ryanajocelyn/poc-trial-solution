@@ -284,7 +284,7 @@ class DebitSvc(BaseSvc):
                     con_exp["TDS Amount"] = con_exp["TDS Amount"] + exp["TDS Amount"]
 
         bk_exp_df = pd.DataFrame(list(final_exps.values()))
-        bk_exp_df.reset_index(inplace=True)
+        bk_exp_df.reset_index(inplace=True, drop=True)
         self.write_to_csv(bk_exp_df, "vendor_expense.csv", index="05")
 
         dr_df = dr_df[dr_df["Vendor"].isnull()].copy()

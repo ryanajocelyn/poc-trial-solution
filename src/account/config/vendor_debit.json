@@ -73,6 +73,18 @@
   "dept": "Common Area",
   "purchase_ac": "Consumables - FireSafety"
 },{
+  "vendor_type": ["BOOMBARRIER"],
+  "vendor": "Cardfing Global Tech",
+  "item_nm": "Boom Barrier Expenses",
+  "dept": "Common Area",
+  "purchase_ac": "Personnel - Gym"
+},{
+  "vendor_type": ["CCTV"],
+  "vendor": "Synergy Technologies - CCTV",
+  "item_nm": "CCTV Expenses",
+  "dept": "Common Area",
+  "purchase_ac": "Personnel - CCTV"
+},{
   "vendor_type": ["OM", "CARPENTARYWORK"],
   "vendor": "Sri Om Furniture",
   "item_nm": "Gym Room Expenses",
