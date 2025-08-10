@@ -53,9 +53,12 @@ class BaseSvc(ABC):
         elif desc.startswith("UPI"):
             desc_split = desc.split("/")
 
-            ref = desc_split[4]
-            if not ref.isnumeric():
-                ref = desc_split[1]
+            ref = desc_split[1]
+            for split_val in desc_split:
+                if split_val.isnumeric():
+                    ref = split_val
+                    break
+
         elif desc.startswith("BIL"):
             ref = desc.split("/")[2]
         else:

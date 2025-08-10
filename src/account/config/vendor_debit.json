@@ -85,6 +85,12 @@
   "dept": "Common Area",
   "purchase_ac": "Personnel - CCTV"
 },{
+  "vendor_type": ["PESTCONTROL1"],
+  "vendor": "Phoenix Pest Control Solutions",
+  "item_nm": "Pest Control Expenses",
+  "dept": "Common Area",
+  "purchase_ac": "Personnel - Common Labour"
+},{
   "vendor_type": ["OM", "CARPENTARYWORK"],
   "vendor": "Sri Om Furniture",
   "item_nm": "Gym Room Expenses",

@@ -6,7 +6,7 @@ from pandas import DataFrame
 
 from account.service.base_svc import BaseSvc
 from account.utils.app_logger import AppLogger
-from account.utils.utils import get_vendor_expenses
+from account.utils.utils import get_vendor_expenses, get_general_expenses
 
 
 class DebitSvc(BaseSvc):
@@ -53,8 +53,10 @@ class DebitSvc(BaseSvc):
             ]
         ]
 
+        gen_expense = get_general_expenses()
+        gen_debit_fn = partial(self.parse_debit_ac, gen_expense=gen_expense)
         dr_df[["Party", "Expense Account", "Department"]] = dr_df.apply(
-            self.parse_debit_ac, axis=1
+            gen_debit_fn, axis=1
         ).to_list()
 
         self.format_fields(
@@ -122,59 +124,27 @@ class DebitSvc(BaseSvc):
         dr_df = dr_df[~dr_df["Description"].str.contains("TREASURER")]
         return dr_df
 
-    def parse_debit_ac(self, row):
+    def parse_debit_ac(self, row, gen_expense):
         desc = row["Description"]
         party, exp_acc, dept = None, None, None
 
-        if "MGRMANI" in desc:
-            party = "Manager Salary"
-            exp_acc = "Manager"
-            dept = "Accounts"
-        elif "SURULIAMMAL" in desc or "RANI" in desc or "BANU" in desc:
-            person = desc.split("/")[-1]
-            party = f"Housekeeping Staff Salary - {person.capitalize()}"
-            exp_acc = "Personnel - Housekeeping"
-            dept = "House Keeping"
-        elif "PESTCONTROL" in desc:
-            person = desc.split("/")[-1]
-            party = f"Pest Control - {person.capitalize()}"
-            exp_acc = "Personnel - Common Labour"
-            dept = "Common Area"
-        elif "PLUMBER" in desc:
-            reason = desc.split("/")[-2]
-            party = f"Plumbing Expenses - {reason}"
-            exp_acc = "Personnel - Plumber"
-            dept = "Plumbing"
-        elif "SUDHAKAR" in desc:
-            reason = desc.split("/")[-2]
-            party = f"Gardening Expenses - {reason}"
-            exp_acc = "Consumables - Gardening"
-            dept = "Common Area"
-        elif "TREASURER" in desc or "WATERCANESUPP" in desc:
-            desc_split = desc.split("/")[-2]
-            party = f"Maintenance - {desc_split}"
-            exp_acc = "Consumables - Security / Office"
-            dept = "Common Area"
-        elif "DGAUTOMATION" in desc:
-            desc_split = desc.split("/")[-2]
-            party = f"DG - {desc_split}"
-            exp_acc = "Consumables - Generator"
-            dept = "Common Area"
-        elif "VENKATESWARAAGE" in desc:
-            desc_split = desc.split("/")[-2]
-            party = f"Diesel - {desc_split}"
-            exp_acc = "Diesel"
-            dept = "Common Area"
-        elif "RAJANASST" in desc:
-            desc_split = desc.split("/")[-2]
-            party = f"Auditor Fees - {desc_split}"
-            exp_acc = "Auditor"
-            dept = "Accounts"
-        elif "DEVIWATERTANK" in desc:
-            desc_split = desc.split("/")[-2]
-            party = f"Lorry Water Charges - {desc_split}"
-            exp_acc = "Metro Water"
-            dept = "Common Area"
+        general_exp = None
+        for exp in gen_expense:
+            exp_items = exp["vendor_type"]
+            for item in exp_items:
+                if item in desc:
+                    general_exp = exp
+                    break
+
+            if general_exp:
+                break
+
+        if general_exp:
+            exp_desc = desc.split("/")[general_exp["counter"]]
+
+            party = f'{general_exp["vendor"]} - {exp_desc.capitalize()}'
+            dept = general_exp["dept"]
+            exp_acc = general_exp["purchase_ac"]
 
         return party, exp_acc, dept
 

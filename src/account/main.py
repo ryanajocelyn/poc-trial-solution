@@ -166,9 +166,9 @@ class Maintenance(Base):
 if __name__ == "__main__":
     # Start Row - Row to start from
     m_params = {
-        "base_path": "D:\\Abiz\\Flats\\Vedanshi\\2025-26\\03. Jun",
-        "stmt_nm": "DetailedStatement-Jun25-2.pdf",
-        "tpl_nm": "batch_dues_receipt_upload_6446527_.csv",
+        "base_path": "D:\\Abiz\\Flats\\Vedanshi\\2025-26\\05. Aug",
+        "stmt_nm": "DetailedStatement-Aug25-1.pdf",
+        "tpl_nm": "batch_dues_receipt_upload_6790414_.csv",
         "start_row": 0,
         "ner": False,
     }

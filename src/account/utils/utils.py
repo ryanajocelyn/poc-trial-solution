@@ -66,3 +66,11 @@ def get_vendor_expenses():
     with open(name_file, "r", encoding="utf-8") as nf:
         name_mappings = json.loads(nf.read())
     return name_mappings
+
+
+def get_general_expenses():
+    parent_dir = get_parent_dir(__file__)
+    name_file = f"{parent_dir}\\config\\general_payments_debit.json"
+    with open(name_file, "r", encoding="utf-8") as nf:
+        name_mappings = json.loads(nf.read())
+    return name_mappings
