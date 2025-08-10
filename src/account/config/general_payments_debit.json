@@ -1,0 +1,73 @@
+[{
+  "vendor_type": ["MGRMANI"],
+  "vendor": "Manager Salary",
+  "dept": "Accounts",
+  "purchase_ac": "Manager",
+  "counter": -1
+}, {
+  "vendor_type": ["SURULIAMMAL", "RANI", "BANU", "USHA"],
+  "vendor": "Housekeeping Staff Salary",
+  "dept": "House Keeping",
+  "purchase_ac": "Personnel - Housekeeping",
+  "counter": -1
+}, {
+  "vendor_type": ["KESFAB"],
+  "vendor": "Painting",
+  "dept": "Common Area",
+  "purchase_ac": "Personnel - Common Labour",
+  "counter": -1
+}, {
+  "vendor_type": ["PLUMBER"],
+  "vendor": "Plumbing Expenses",
+  "dept": "Plumbing",
+  "purchase_ac": "Personnel - Plumber",
+  "counter": -2
+}, {
+  "vendor_type": ["SUDHAKAR"],
+  "vendor": "Gardening Expenses",
+  "dept": "Common Area",
+  "purchase_ac": "Consumables - Gardening",
+  "counter": -2
+}, {
+  "vendor_type": ["TREASURER", "WATERCANESUPP"],
+  "vendor": "Maintenance",
+  "dept": "Common Area",
+  "purchase_ac": "Consumables - Security / Office",
+  "counter": -2
+}, {
+  "vendor_type": ["DGAUTOMATION"],
+  "vendor": "Generator",
+  "dept": "Common Area",
+  "purchase_ac": "Consumables - Generator",
+  "counter": -2
+}, {
+  "vendor_type": ["VENKATESWARAAGE"],
+  "vendor": "Diesel",
+  "dept": "Common Area",
+  "purchase_ac": "Diesel",
+  "counter": -2
+}, {
+  "vendor_type": ["RAJANASST"],
+  "vendor": "Auditor Fees",
+  "dept": "Accounts",
+  "purchase_ac": "Auditor",
+  "counter": -2
+}, {
+  "vendor_type": ["DEVIWATERTANK"],
+  "vendor": "Lorry Water Charges",
+  "dept": "Common Area",
+  "purchase_ac": "Metro Water",
+  "counter": -2
+}, {
+  "vendor_type": ["CARPENTERGYM"],
+  "vendor": "Carpentry Charges",
+  "dept": "Common Area",
+  "purchase_ac": "Personnel - Gym",
+  "counter": -2
+}, {
+  "vendor_type": ["AUDITASST"],
+  "vendor": "IT Audit Tax Payment",
+  "dept": "Accounts",
+  "purchase_ac": "IT Taxes",
+  "counter": -2
+}]
